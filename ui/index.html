@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="/eel.js"></script>
+    <title>rapidJ ── New File</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+    <script src="../deps/codemirror/lib/codemirror.js"></script>
+    <link rel="stylesheet" href="../deps/codemirror/lib/codemirror.css">
+    <script src="../deps/codemirror/mode/clike/clike.js"></script>
+    <script src="../deps/codemirror/addon/hint/show-hint.js"></script>
+    <script src="../deps/codemirror/addon/hint/show-hint.js"></script>
+    <link rel="stylesheet" href="../deps/codemirror/addon/hint/show-hint.css">
+
+    <script src="../deps/rapidedit/min/vs/loader.js"></script>
+    <style>
+        .button {
+          border-radius: 4px;
+          background-color: #585858;
+          border: none;
+          color: #FFFFFF;
+          text-align: center;
+          font-size: 10px;
+          padding-left: 25px;
+          padding-right: 25px;
+          padding-top: 5px;
+          padding-bottom: 5px;
+          transition: all 0.5s;
+          cursor: pointer;
+          margin: 5px;
+        }
+        
+        .button span {
+          cursor: pointer;
+          display: inline-block;
+          position: relative;
+          transition: 0.5s;
+        }
+        
+        .button span:after {
+          content: '\00bb';
+          position: absolute;
+          opacity: 0;
+          top: 0;
+          right: -0px;
+          transition: 0.5s;
+        }
+        
+        .button:hover span {
+          padding-right: 13px;
+        }
+        
+        .button:hover span:after {
+          opacity: 1;
+          right: 0;
+        }
+
+        
+        </style>
+</head>
+<body style="font-family: 'Lato', sans-serif;">
+    <div style="background-color: rgb(241, 241, 241); padding-top: 2px; padding-bottom: 2px; border-radius: 15px; width: 50px; height: 25px; float: left; box-shadow: 0px 4px 12px 0.001em rgb(136, 136, 136);">
+        <img src="../deps/img/rapidjlogoSMALL.png" style="height: 100%; width: 35%; text-align: center; display: block; margin: auto; ">
+    </div>
+    <div style="background-color: rgb(241, 241, 241); display: inline-block;border-radius: 15px; margin-left: 10px; box-shadow: 0px 4px 12px 0.001em rgb(136, 136, 136);">
+        <button class="button" style="display: inline-block; margin-left: 20px;" id="newfile"><span>New File </span></button>
+        <button class="button" style="display: inline-block; margin-left: 20px;  margin-right: 20px;" onclick="getPathToFile()"><span>Open File </span></button>
+    </div>
+    <div style="background-color: rgb(241, 241, 241); border-radius: 15px; float:right; box-shadow: 0px 4px 12px 0.001em rgb(136, 136, 136);">
+        <button class="button" id="save" style="display: inline-block; background-color: rgb(29, 167, 185); text-align: right; margin-left: 20px;"><span>Save </span></button>
+        <button class="button" id="run" style="display: inline-block; background-color: green; text-align: right; margin-left: 20px;  margin-right: 20px;"><span>Run </span></button>
+    </div>
+    <div style="background-color: rgb(241, 241, 241); margin-top: 10px; padding-top: 15px; padding-bottom: 2px; border-radius: 15px; height: 550px; box-shadow: 0px 4px 12px 0.001em rgb(136, 136, 136);">
+        <div id="input" data-enable-grammarly="false" style="transition: 0.5s; padding-left: 1%; width: 97%; height: 100%; resize: none; background-color: transparent; border-color: transparent; outline: none;" placeholder="Java Code Here"></div>
+    </div>
+    <div id="container" style="transition: all 0.5s; overflow: auto; white-space: nowrap; overflow-y: hidden; background-color: rgb(241, 241, 241); margin-top: 10px; padding-top: 15px; padding-bottom: 2px; border-radius: 15px; ; box-shadow: 0px 4px 12px 0.001em rgb(136, 136, 136);">
+        <div id="bgc" style="transition: all 0.5s; display: inline-block; background-color: rgb(180, 180, 180); width: 200px; height: 90%; border-radius: 15px; margin-left: 1%; margin-bottom: 1%;">
+            <p id="timetag" style="font-size: 10px; color: white; margin-left: 5%; ">Current</p>
+            <p id="status" style="font-size: 20px; color: white; margin-left: 5%; line-height: 0.15; margin-top: -0.15%;">Not Running</p>
+        </div>
+    </div>
+    <div style="background-color: rgb(241, 241, 241); margin-top: 10px; padding-top: 15px; padding-bottom: 2px; border-radius: 15px; box-shadow: 0px 4px 12px 0.001em rgb(136, 136, 136);">
+        <textarea id="output" readonly data-enable-grammarly="false" style="padding-left: 1.5%; width: 90%; height: 150px; resize: none; background-color: transparent; border-color: transparent; outline: none;" placeholder="Output"></textarea>
+    </div>
+    <div style="background-color: rgba(100, 100, 100, 0.5); display: none; width: 100%; height: 100%;min-height: 1px; position: absolute; bottom:1px"></div>
+    <div id="popup" style="z-index:5;position:relative;bottom:250px;left:35%;width:20%;height:7.5%;background-color: rgb(187, 187, 187);border-radius: 5px;display: none;">
+        <p style="text-align: center;color: white; font-size: medium;"><b>Save Required</b></p>
+        <p style="text-align: center;color: white;">The file must be saved before compiling. Save?</p>
+            <div style="text-align: center;margin-bottom: 8%;">
+                <button>Yes</button>
+                <button>No</button>
+            </div>
+    </div>
+    <script>
+        var bgc = document.getElementById("bgc");
+        var tt = document.getElementById("timetag");
+        var st = document.getElementById("status");
+        var current = 0
+
+        function insertAfter(newNode, existingNode) {
+            existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
+        }
+
+        require.config({ paths: { vs: 'deps/rapidedit/min/vs' } });
+
+			require(['vs/editor/editor.main'], function () {
+
+                monaco.editor.defineTheme('myTheme', {
+    base: 'vs',
+    inherit: true,
+    rules: [{ background: 'f1f1f1' }],
+    colors: {
+        'editor.foreground': '#f1f1f1',
+        'editor.background': '#f1f1f1',
+        'editorCursor.foreground': '#8B0000',
+        'editor.lineHighlightBackground': '#0000FF20',
+        'editorLineNumber.foreground': '#008800',
+        'editor.selectionBackground': '#88000030',
+        'editor.inactiveSelectionBackground': '#88000015'
+    }
+});
+
+				window.editor = monaco.editor.create(document.getElementById('input'), {
+					language: 'java',
+                    theme: 'myTheme'
+				});
+			
+
+        var input = document.getElementById("input");
+        var output = document.getElementById("output");
+        var cinput = window.editor
+        //var cinput = CodeMirror.fromTextArea(input, {
+         //   lineNumbers: true,
+           // mode: "text/x-java"
+        //});
+
+        eel.expose(error);
+        function error(errorcode, errormsg) {
+            bgc.style["background-color"] = "rgb(168, 36, 36)";
+            st.innerHTML = "Failed"
+            document.getElementById("run").innerHTML = "Run"
+            document.getElementById("run").style["background-color"] = "green"
+            output.value = output.value + errormsg;
+            output.value = output.value + "\n────── Failed To Compile\n";
+            output.scrollTop = output.scrollHeight 
+        }
+
+        eel.expose(compilesuccess);
+        function compilesuccess() {
+            bgc.style["background-color"] = "rgb(36, 168, 36)";
+            st.innerHTML = "Running"
+            output.value = output.value + "────── Successfully Compiled";
+            output.value = output.value + "\n────── Running Application\n\n";
+            output.scrollTop = output.scrollHeight 
+        }
+
+        eel.expose(outputj);
+        function outputj(outpute) {
+            output.value = output.value + outpute;
+        }
+
+        eel.expose(finished);
+        function finished() {
+            bgc.style["background-color"] = "rgb(36, 110, 36)";
+            st.innerHTML = "Run Complete";
+            document.getElementById("run").innerHTML = "Run";
+            document.getElementById("run").style["background-color"] = "green";
+            output.value = output.value + "\n────── Run Complete";
+            output.scrollTop = output.scrollHeight;
+        }
+
+        eel.expose(setFile);
+        function setFile(contents, ttle) {
+            document.title = "rapidJ ─ "+ttle;
+            cinput.setValue(contents);
+        }
+
+        document.getElementById("run").onclick = function(){
+            eel.run(cinput.getValue());
+            if(current != 0) {
+                console.log(current)
+                var clone = bgc.cloneNode(true);
+                clone.id = "old"+current
+                clone.querySelector("p").innerHTML = clone.querySelector("p").innerHTML.substring(0, (clone.querySelector("p").innerHTML.length - 16))
+                insertAfter(clone, bgc);
+            }
+            current = current + 1
+            var today = new Date();
+            var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+            bgc.style["background-color"] = "rgb(180, 132, 69)";
+            tt.innerHTML = "Compiled/Run at "+time+" - <i>LATEST</i>";
+            st.innerHTML = "Compiling";
+            document.getElementById("run").innerHTML = "Running";
+            document.getElementById("run").style["background-color"] = "darkgreen";
+            output.value = output.value + "\n\n────── Compiling Current File\n";
+            output.scrollTop = output.scrollHeight;
+        }
+
+        document.getElementById("newfile").onclick = function(){
+            cinput.setValue("");
+            eel.newFile();
+            document.title = "rapidJ ─ New File";
+        }
+
+        document.getElementById("save").onclick = function(){
+            eel.saveFile(cinput.getValue())
+        }
+
+        eel.initC()
+    });
+    </script>
+    <script type="text/javascript">
+        function getPathToFile() {
+            eel.openFile()(r => console.log(r));
+        };
+    </script>
+</body>
+</html>
